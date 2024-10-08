@@ -10,7 +10,7 @@ data = generate_output(
     "Should I wear a seatbelt?",
     model,
     tokenizer,
-    k=500,
+    k=10,
     T=0.2,
     max_new_tokens=20,
     verbose=True,
