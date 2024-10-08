@@ -4,53 +4,116 @@ import torch
 
 
 def generate_response(
-    model, tokenizer, init_prompt, k=10, T=0.5, max_new_tokens=100, verbose=True
+    init_prompt,
+    model,
+    tokenizer,
+    k=10,
+    T=0.5,
+    max_new_tokens=100,
+    data=None,
+    cuda=False,
+    verbose=True,
+    random_state=None,
 ):
 
+    rng = np.random.default_rng(random_state)
     TERMINATOR = tokenizer.eos_token
 
-    new_tokens = []
+    if data is None:
+        data = pd.DataFrame(
+            columns=[
+                "texts",
+                "token_ids",
+                "probs",
+                "selected_idx",
+                "selected_text",
+            ]
+        )
 
-    data = pd.DataFrame(columns=["texts", "probs", "selected_idx"])
+        output = ""
+        output_ids = torch.tensor([], dtype=torch.long)
+    else:
+        output = data["selected_text"].str.cat(sep="")
+        output_ids = torch.tensor(
+            data.apply(
+                lambda row: row["token_ids"][row["selected_idx"]], axis=1
+            ).tolist()
+        ).reshape(1, -1)
 
-    prompt = init_prompt
-    while not (prompt.find(TERMINATOR) >= 0 or len(new_tokens) >= max_new_tokens):
-        prompt = init_prompt + "".join(new_tokens)
+    if verbose:
+        print(init_prompt)
+        print(output, end="", flush=True)
 
-        if verbose:
-            print(prompt)
+    prompt = [
+        {"role": "user", "content": init_prompt},
+        {"role": "assistant", "content": ""},
+    ]
+    prompt_ids = tokenizer.apply_chat_template(
+        prompt, return_tensors="pt"
+    )[0][:-1].reshape(1, -1)
 
-        input_ids = tokenizer.encode(prompt, return_tensors="pt")
-        input_ids = input_ids.cuda()
+    while not (
+        output.find(TERMINATOR) >= 0
+        or output_ids.shape[-1] >= max_new_tokens
+    ):
+
+        if cuda:
+            prompt_ids = prompt_ids.cuda()
+            output_ids = output_ids.cuda()
 
         with torch.no_grad():
+            all_ids = torch.cat(
+                [prompt_ids, output_ids], dim=-1
+            )
             outputs = model(
-                input_ids,
+                all_ids,
                 use_cache=False,
                 output_hidden_states=True,
                 output_attentions=False,
             )
             logits = outputs["logits"]
 
-        input_ids = input_ids.cpu()
+        # prompt_ids = prompt_ids.cpu()
         logits = logits.cpu()
         logits = logits[-1, -1]
 
         logits_topk, logits_topk_idx = torch.topk(logits, k)
 
-        texts_topk = tokenizer.convert_ids_to_tokens(logits_topk_idx)
+        texts_topk = [tokenizer.decode(idx) for idx in logits_topk_idx]
         probs_topk = torch.nn.functional.softmax(logits_topk / T, dim=-1)
         probs_topk = probs_topk.detach().numpy()
 
-        next_idx = np.random.choice(len(texts_topk), p=probs_topk)
+        next_idx = rng.choice(len(texts_topk), p=probs_topk)
 
-        new_tokens.append(texts_topk[next_idx])
-
-        d = {"texts": texts_topk, "probs": probs_topk, "selected_idx": next_idx}
+        d = {
+            "texts": texts_topk,
+            "token_ids": logits_topk_idx,
+            "probs": probs_topk,
+            "selected_idx": next_idx,
+            "selected_text": texts_topk[next_idx],
+        }
 
         data.loc[len(data)] = d
 
+        output += texts_topk[next_idx]
+        output_ids = torch.cat(
+            [output_ids, logits_topk_idx[next_idx].reshape(1, -1)], dim=-1
+        )
+
+        if verbose:
+            print(texts_topk[next_idx], end="", flush=True)
+
+    print()
     return data
 
 
-# if __name__ == '__main__':
+def edit_output(
+    data: pd.DataFrame, token_pos: int, new_token: int
+) -> pd.DataFrame:
+    new_text = data.loc[token_pos, "texts"][new_token]
+    data.loc[token_pos, "selected_idx"] = new_token
+    data.loc[token_pos, "selected_text"] = new_text
+
+    # Drop all entries after the modified token
+    data.drop(range(token_pos + 1, len(data)), inplace=True)
+    return data
