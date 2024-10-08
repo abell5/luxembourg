@@ -1,9 +1,10 @@
+import json
 import pandas as pd
 import numpy as np
 import torch
 
 
-def generate_output(
+def generate_output_stream(
     init_prompt,
     model,
     tokenizer,
@@ -14,6 +15,7 @@ def generate_output(
     cuda=False,
     verbose=True,
     random_state=None,
+    as_json=True,
 ):
 
     rng = np.random.default_rng(random_state)
@@ -82,8 +84,8 @@ def generate_output(
 
         d = {
             "texts": texts_topk,
-            "token_ids": logits_topk_idx,
-            "probs": probs_topk,
+            "token_ids": logits_topk_idx.tolist(),
+            "probs": probs_topk.tolist(),
             "selected_idx": next_idx,
             "selected_text": texts_topk[next_idx],
         }
@@ -98,11 +100,45 @@ def generate_output(
         if verbose:
             print(texts_topk[next_idx], end="", flush=True)
 
-    print()
-    return data
+        if as_json:
+            d = json.dumps(d) + "\n"
+
+        yield d
+
+    if verbose:
+        print()
 
 
-def edit_output(data: pd.DataFrame, token_pos: int, new_token: int) -> pd.DataFrame:
+def generate_output(
+    init_prompt,
+    model,
+    tokenizer,
+    k=10,
+    T=0.5,
+    max_new_tokens=100,
+    data=None,
+    cuda=False,
+    verbose=True,
+    random_state=None,
+):
+    data = generate_output_stream(
+        init_prompt,
+        model,
+        tokenizer,
+        k=k,
+        T=T,
+        max_new_tokens=max_new_tokens,
+        data=data,
+        cuda=cuda,
+        verbose=verbose,
+        random_state=random_state,
+        as_json=False,
+    )
+    return pd.DataFrame(data)
+
+
+def edit_output(data: list, token_pos: int, new_token: int) -> pd.DataFrame:
+    data = pd.DataFrame(data)
     new_text = data.loc[token_pos, "texts"][new_token]
     data.loc[token_pos, "selected_idx"] = new_token
     data.loc[token_pos, "selected_text"] = new_text
