@@ -39,3 +39,23 @@ response = requests.post(
     files={"data": json.dumps(out_)},
 )
 out_ = json.loads(response.content)
+
+response = requests.post(
+    URL + "/generate",
+    params={
+        "init_prompt": "Should I wear a seatbelt? Why not?",
+        "k": "50",
+        "T": "1.5",
+        "max_new_tokens": "50",
+        "random_state": "42",
+        "verbose": "true",
+    },
+    files={"data": out_},
+    stream=True,
+)
+
+out_ = []
+for chunk in response.iter_lines(chunk_size=1):
+    chunk = json.loads(chunk)
+    print(chunk["selected_text"], end="", flush=True)
+    out_.append(chunk)
