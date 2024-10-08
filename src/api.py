@@ -29,10 +29,15 @@ async def generate(
     max_new_tokens: int = 100,
     verbose: bool = False,
     random_state: int = None,
+    data: list = None,
 ):
     """
     Generate an output stream based on a prompt, using a LLM (Llama 3.2 1B Instruct).
     """
+    if data is not None:
+        print(json.loads(data[0]))
+        data = pd.DataFrame(json.loads(data[0]))
+
     data = generate_output_stream(
         init_prompt=init_prompt,
         model=model,
@@ -43,6 +48,7 @@ async def generate(
         cuda=CUDA,
         verbose=verbose,
         random_state=random_state,
+        data=data,
     )
     return StreamingResponse(data, media_type="application/json")
 
