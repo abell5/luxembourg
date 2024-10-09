@@ -26,3 +26,7 @@ cd luxembourg
 # Build and run the container
 make run
 ```
+
+After running the `make run` command, the API will be available at
+`http://localhost:8000`. You can access the API documentation by visiting
+`http://localhost:8000/docs`.
