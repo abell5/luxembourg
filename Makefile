@@ -21,7 +21,7 @@ endif
 ## Build and run the container
 run:
 	podman build --tag 'llm-viz-api' .
-	podman run --detach 'llm-viz-api'
+	podman run -p 8000:8000 --detach 'llm-viz-api'
 
 ## Delete all compiled Python files
 clean:
