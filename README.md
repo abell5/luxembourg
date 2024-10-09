@@ -13,8 +13,8 @@ Afer creating an account, you can get your access token by visiting the
 [Hugging Face API page](https://huggingface.co/settings/tokens).
 Next, modify the `.env` file in the project directory and replace
 `YOUR_HUGGINGFACE_TOKEN` value with your access token. Finally, you will need
-to request access permission for the `Llama-3.1-8B-Instruct` model by visiting
-the [model's Hugging Face page](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct).
+to request access permission for the `Llama-3.2-1B-Instruct` model by visiting
+the [model's Hugging Face page](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct).
 
 ```bash
 # Clone the repository
