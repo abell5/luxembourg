@@ -1,5 +1,5 @@
 from dotenv import dotenv_values
-from src import load_model, generate_output, edit_output
+from api import load_model, generate_output, edit_output
 
 token = dotenv_values()["HF_TOKEN"]
 

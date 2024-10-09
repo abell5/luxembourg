@@ -4,7 +4,7 @@ import pandas as pd
 import torch
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-from src import load_model, generate_output_stream, edit_output
+from . import load_model, generate_output_stream, edit_output
 
 CUDA = torch.cuda.is_available()
 MODEL_NAME = "meta-llama/Llama-3.2-1B-Instruct"
