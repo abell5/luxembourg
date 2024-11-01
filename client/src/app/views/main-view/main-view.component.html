@@ -1,0 +1,49 @@
+<div class="component-container-vertical" style="background-color: #f1f1f1;">
+
+    <div class="component-container-horizontal-height-param" style="--height: 5%;">
+        <app-toolbar></app-toolbar>
+    </div>
+
+
+    <div class="component-container-horizontal">
+
+        <div class="component-container-vertical">
+
+            <div class="component-container-horizontal">
+
+                <app-section-template [title]="'Response'">
+
+                    <app-output-sequence 
+                        (tokenClicked)="this.tokenClicked($event)"
+                        [tokenDistribution]="(this.promptResponse$ | async)!">
+                    </app-output-sequence>
+
+                </app-section-template>
+
+            </div>
+
+            <div class="component-container-horizontal-height-param" style="--height: 10%;">
+                <app-input-prompt (promptGenerated)="this.newPromptCreated($event)"></app-input-prompt>
+            </div>
+
+
+
+        </div>
+
+        <div class="component-container-vertical-width-param" style="--width: 30%;">
+
+            <div class="component-container-horizontal">
+
+                <app-section-template [title]="'Distribution'">
+                    <app-distribution-view></app-distribution-view>
+                </app-section-template>
+                
+            </div>
+
+            
+        </div>
+        
+    </div>
+    
+
+</div>

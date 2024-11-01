@@ -3,6 +3,13 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+
+    // TODO: The setting below was motivated by this issue: https://github.com/ngrx/platform/issues/3654. 
+    // Without it, I was not able to set ngrx effects in my code. 
+    // Understand this flag better.
+    "useDefineForClassFields": false,
+
+
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,
