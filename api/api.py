@@ -1,3 +1,4 @@
+import os
 import json
 from dotenv import dotenv_values
 import pandas as pd
@@ -8,7 +9,11 @@ from . import load_model, generate_output_stream, edit_output
 
 CUDA = torch.cuda.is_available()
 MODEL_NAME = "meta-llama/Llama-3.2-1B-Instruct"
-TOKEN = dotenv_values()["HF_TOKEN"]
+
+if "HF_TOKEN" in os.environ:
+    TOKEN = os.environ["HF_TOKEN"]
+else:
+    TOKEN = dotenv_values()["HF_TOKEN"]
 
 model, tokenizer = load_model(MODEL_NAME, token=TOKEN)
 

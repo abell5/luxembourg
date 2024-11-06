@@ -16,6 +16,10 @@ Next, modify the `.env` file in the project directory and replace
 to request access permission for the `Llama-3.2-1B-Instruct` model by visiting
 the [model's Hugging Face page](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct).
 
+If you're running the API in a Kubernetes cluster, you will need to create a
+secret with `kubectl create secret generic hf-token
+--from-literal=token=YOUR_HUGGINGFACE_TOKEN`
+
 ```bash
 # Clone the repository
 git clone https://github.com/abell5/luxembourg.git

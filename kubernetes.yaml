@@ -1,0 +1,103 @@
+# Create the Deployment on the cluster by running:
+# kubectl apply -f kubernetes.yaml
+# Get status of the Deployment by running:
+# kubectl get svc
+# kubectl describe svc llm-viz
+# Get pod status by running:
+# kubectl describe pod llm-viz
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-viz
+  labels:
+    app: llm-viz
+    source: llm-viz
+spec:
+  # Run two copies of the Pod
+  replicas: 2
+  # Perform rolling updates, starting containers before stopping the old ones
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      # This is how the Deployment recognizes its Pods, has to match the labels
+      # of the Pod template
+      app: llm-viz
+  template:
+    metadata:
+      labels:
+        app: llm-viz
+    spec:
+      containers:
+        # Here's our container
+        - name: llm-viz
+          # Put your own image here
+          image: ghcr.io/abell5/llm-viz:latest
+          env:
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hf-token
+                  key: token
+          ports:
+            # This is the port we'll expose to the internet eventually
+            - name: web
+              containerPort: 8000
+          resources:
+            requests:
+              cpu: 32
+              memory: 64Gi # Request that this memory be allocated to us
+            limits:
+              cpu: 64 # Throttle the container if using more CPU
+              memory: 128Gi # Terminate the container if using more memory
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-viz
+  labels:
+    app: llm-viz
+    source: llm-viz
+spec:
+  type: ClusterIP # This is the default, a virtual IP address will be allocated
+  selector:
+    # This is how the Service will find the Pods
+    app: llm-viz
+  ports:
+    - name: web
+      protocol: TCP
+      port: 80 # The port exposed by the service
+      targetPort: 8000 # The port or port name of the Pod
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: llm-viz
+  annotations:
+    spec.ingressClassName: haproxy
+    # kubernetes.io/ingress.class: haproxy
+    # The following 2 lines redirect HTTP traffic to HTTPS for you
+    haproxy.org/ssl-redirect: "true"
+    haproxy.org/ssl-redirect-code: "301"
+    # The following line record the user's IP address in the 'X-Forwarded-For' header
+    haproxy.org/forwarded-for: "true"
+spec:
+  rules:
+    - host: llm-viz.users.hsrn.nyu.edu
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # This is the name and port of your Service
+                name: llm-viz
+                port:
+                  number: 80
