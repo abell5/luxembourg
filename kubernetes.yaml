@@ -48,10 +48,10 @@ spec:
               containerPort: 8000
           resources:
             requests:
-              cpu: 32
+              cpu: 16
               memory: 64Gi # Request that this memory be allocated to us
             limits:
-              cpu: 64 # Throttle the container if using more CPU
+              cpu: 16 # Throttle the container if using more CPU
               memory: 128Gi # Terminate the container if using more memory
 
 ---
