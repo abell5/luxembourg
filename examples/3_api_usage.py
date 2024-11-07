@@ -6,18 +6,19 @@ import json
 import requests
 
 # URL for the web service (set to local host, port 8000)
-URL = "http://127.0.0.1:8000"
+# URL = "http://127.0.0.1:8000"
+URL = "https://llm-viz.users.hsrn.nyu.edu"
 
 # Generate data for a given prompt
 response = requests.post(
     URL + "/generate",
     params={
         "init_prompt": "Should I wear a seatbelt? Why not?",
-        "k": "50",
-        "T": "1.5",
+        "k": "100",
+        "T": "1",
         "max_new_tokens": "500",
-        "random_state": "42",
-        "verbose": "true",
+        "random_state": "0",
+        "verbose": "false",
     },
     stream=True,
 )
@@ -33,8 +34,8 @@ for chunk in response.iter_lines(chunk_size=1):
 response = requests.post(
     URL + "/edit",
     params={
-        "token_pos": "9",
-        "new_token": "1",
+        "token_pos": "7",
+        "new_token": "34",
     },
     files={"data": json.dumps(out_)},
 )
@@ -45,15 +46,16 @@ response = requests.post(
     params={
         "init_prompt": "Should I wear a seatbelt? Why not?",
         "k": "50",
-        "T": "1",
+        "T": "1.5",
         "max_new_tokens": "500",
         "random_state": "42",
-        "verbose": "true",
+        "verbose": "false",
     },
     files={"data": out_},
     stream=True,
 )
 
+print("".join([s["selected_text"] for s in eval(out_)]), end="", flush=True)
 out_ = []
 for chunk in response.iter_lines(chunk_size=1):
     chunk = json.loads(chunk)
