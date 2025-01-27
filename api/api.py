@@ -5,6 +5,7 @@ import pandas as pd
 import torch
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 from . import load_model, generate_output, generate_output_stream, edit_output
 
 CUDA = torch.cuda.is_available()
@@ -19,6 +20,13 @@ model, tokenizer = load_model(MODEL_NAME, token=TOKEN, cuda=True)
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins="*",  # This could be a security risk...
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["X-Requested-With", "Content-Type"],
+)
 
 @app.get("/")
 async def root():
