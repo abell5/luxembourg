@@ -94,7 +94,7 @@ def generate_output_stream(
 
         output += texts_topk[next_idx]
         output_ids = torch.cat(
-            [output_ids, logits_topk_idx[next_idx].reshape(1, -1)], dim=-1
+            [output_ids.cpu(), logits_topk_idx[next_idx].reshape(1, -1)], dim=-1
         )
 
         if verbose:
@@ -104,6 +104,9 @@ def generate_output_stream(
             d = json.dumps(d) + "\n"
 
         yield d
+
+    if cuda:
+        del prompt_ids
 
     if verbose:
         print()
