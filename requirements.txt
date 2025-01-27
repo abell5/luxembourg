@@ -2,4 +2,5 @@ fastapi[standard]==0.115.0
 transformers==4.45.2
 pandas==2.2.3
 numpy==2.1.2
-torch==2.4.1
+# For CPU version: Uncomment line below and remove cuda install from Dockerfile
+# torch==2.4.1

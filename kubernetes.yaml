@@ -53,6 +53,7 @@ spec:
             limits:
               cpu: 16 # Throttle the container if using more CPU
               memory: 128Gi # Terminate the container if using more memory
+              nvidia.com/gpu: 1 # Request 1 NVIDIA GPU
 
 ---
 
