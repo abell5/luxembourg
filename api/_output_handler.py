@@ -1,4 +1,5 @@
 import json
+from time import sleep
 import pandas as pd
 import numpy as np
 import torch
@@ -11,6 +12,7 @@ def generate_output_stream(
     k=10,
     T=0.5,
     max_new_tokens=100,
+    sleep_time=0,
     data=None,
     cuda=False,
     verbose=True,
@@ -104,6 +106,7 @@ def generate_output_stream(
             d = json.dumps(d) + "\n"
 
         yield d
+        sleep(sleep_time)
 
     if cuda:
         del prompt_ids

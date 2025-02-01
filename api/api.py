@@ -28,6 +28,7 @@ app.add_middleware(
     allow_headers=["X-Requested-With", "Content-Type"],
 )
 
+
 @app.get("/")
 async def root():
     # TODO: Return info on available endpoints with description of parameters
@@ -40,6 +41,7 @@ async def generate(
     k: int = 30,
     T: float = 1,
     max_new_tokens: int = 100,
+    sleep_time: float = 0.0,
     verbose: bool = False,
     random_state: int = None,
     data: list = None,
@@ -58,6 +60,7 @@ async def generate(
         k=k,
         T=T,
         max_new_tokens=max_new_tokens,
+        sleep_time=sleep_time,
         cuda=CUDA,
         verbose=verbose,
         random_state=random_state,
@@ -67,7 +70,7 @@ async def generate(
 
 
 @app.post("/generate_static", summary="Generate an output")
-async def generate(
+async def generate_static(
     init_prompt: str,
     k: int = 30,
     T: float = 1,

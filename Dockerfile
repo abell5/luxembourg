@@ -32,5 +32,5 @@ COPY ./requirements.txt /src/requirements.txt
 RUN pip3 install --no-cache-dir --upgrade -r /src/requirements.txt
 RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 COPY ./api /src/api
-COPY ./.env /src/.env
+# COPY ./.env /src/.env
 CMD ["fastapi", "run", "api/api.py", "--port", "8000", "--workers", "-1"]
