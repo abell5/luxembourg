@@ -14,7 +14,7 @@ metadata:
     source: llm-viz
 spec:
   # Run two copies of the Pod
-  replicas: 2
+  replicas: 1
   # Perform rolling updates, starting containers before stopping the old ones
   strategy:
     type: RollingUpdate

@@ -1,4 +1,6 @@
 import os
+import pickle
+# from copy import deepcopy
 import json
 from dotenv import dotenv_values
 import pandas as pd
@@ -6,17 +8,28 @@ import torch
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from . import load_model, generate_output, generate_output_stream, edit_output
+from . import (
+    load_model,
+    generate_output,
+    generate_output_stream,
+    edit_output,
+)
 
 CUDA = torch.cuda.is_available()
 MODEL_NAME = "meta-llama/Llama-3.2-1B-Instruct"
+
+# Super scrapy patching for the demo
+# generated_output = []
+pickle.dump([], open('generated_output.pkl', 'wb'))
+# input_prompt = ""
+pickle.dump("", open('input_prompt.pkl', 'wb'))
 
 if "HF_TOKEN" in os.environ:
     TOKEN = os.environ["HF_TOKEN"]
 else:
     TOKEN = dotenv_values()["HF_TOKEN"]
 
-model, tokenizer = load_model(MODEL_NAME, token=TOKEN, cuda=True)
+model, tokenizer = load_model(MODEL_NAME, token=TOKEN, cuda=CUDA)
 
 app = FastAPI()
 
@@ -49,12 +62,18 @@ async def generate(
     """
     Generate an output stream based on a prompt, using a LLM (Llama 3.2 1B Instruct).
     """
+    generated_output = []
+    pickle.dump(generated_output, open('generated_output.pkl', 'wb'))
+    pickle.dump(init_prompt, open('input_prompt.pkl', 'wb'))
+    # print(input_prompt)
+    # print(generated_output)
+
     if data is not None:
-        print(json.loads(data[0]))
         data = pd.DataFrame(json.loads(data[0]))
 
     data = generate_output_stream(
         init_prompt=init_prompt,
+        generated_output=generated_output,
         model=model,
         tokenizer=tokenizer,
         k=k,
@@ -83,7 +102,6 @@ async def generate_static(
     Generate an output stream based on a prompt, using a LLM (Llama 3.2 1B Instruct).
     """
     if data is not None:
-        print(json.loads(data[0]))
         data = pd.DataFrame(json.loads(data[0]))
 
     data = generate_output(
@@ -98,6 +116,46 @@ async def generate_static(
         random_state=random_state,
         data=data,
     )
+    return data
+
+
+@app.post("/regenerate", summary="Generate the output while editing a specific token.")
+async def regenerate(
+    # generated_output: list,
+    idx_counter: int,
+    new_token_str: str,
+    # model,
+    # tokenizer,
+    k: int = 30,
+    T: float = 1,
+    max_new_tokens: int = 100,
+    sleep_time: float = 0.0,
+    verbose: bool = False,
+    random_state: int = None,
+):
+    input_prompt = pickle.load(open('input_prompt.pkl', 'rb'))
+    generated_output = pickle.load(open('generated_output.pkl', 'rb'))
+    print(input_prompt)
+
+    data = edit_output(generated_output, idx_counter, new_token_str, tokenizer)
+    generated_output = json.loads(data.to_json(orient="records"))
+
+    data = generate_output_stream(
+        init_prompt=input_prompt,
+        generated_output=generated_output,
+        model=model,
+        tokenizer=tokenizer,
+        k=k,
+        T=T,
+        max_new_tokens=max_new_tokens,
+        sleep_time=sleep_time,
+        data=data,
+        cuda=CUDA,
+        verbose=verbose,
+        random_state=random_state,
+        as_json=True,
+    )
+
     return StreamingResponse(data, media_type="application/json")
 
 
@@ -112,6 +170,5 @@ async def edit(
     output, truncated to the token position.
     """
     data = pd.DataFrame(json.loads(data[0]))
-    print(data)
     data = edit_output(data, token_pos, new_token)
     return data.to_json(orient="records")
