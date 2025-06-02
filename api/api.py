@@ -16,7 +16,7 @@ if "HF_TOKEN" in os.environ:
 else:
     TOKEN = dotenv_values()["HF_TOKEN"]
 
-model, tokenizer = load_model(MODEL_NAME, token=TOKEN, cuda=True)
+model, tokenizer = load_model(MODEL_NAME, token=TOKEN, cuda=CUDA)
 
 app = FastAPI()
 

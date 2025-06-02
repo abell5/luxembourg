@@ -6,8 +6,8 @@ import json
 import requests
 
 # URL for the web service (set to local host, port 8000)
-# URL = "http://127.0.0.1:8000"
-URL = "https://llm-viz.users.hsrn.nyu.edu"
+URL = "http://127.0.0.1:8000"
+# URL = "https://llm-viz.users.hsrn.nyu.edu"
 
 # Generate data for a given prompt
 response = requests.post(
@@ -16,7 +16,7 @@ response = requests.post(
         "init_prompt": "Should I wear a seatbelt? Why not?",
         "k": "100",
         "T": "1",
-        "max_new_tokens": "500",
+        "max_new_tokens": "20",
         "random_state": "0",
         "verbose": "false",
     },
@@ -28,7 +28,7 @@ for chunk in response.iter_lines(chunk_size=1):
     chunk = json.loads(chunk)
     print(chunk["selected_text"], end="", flush=True)
     out_.append(chunk)
-
+print()
 
 # Edit the output
 response = requests.post(
