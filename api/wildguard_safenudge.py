@@ -85,6 +85,8 @@ class WildGuard:
             if self._model.device.type != "cpu":
                 scores = output["scores"][-2].cpu()
                 del output, input_ids
+            else:
+                scores = output["scores"][-2]
 
             if output_scores:
                 return scores

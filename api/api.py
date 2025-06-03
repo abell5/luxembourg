@@ -74,6 +74,7 @@ async def generate(
     init_prompt: str,
     k: int = 30,
     T: float = 1,
+    tau: float = 0.5,
     max_new_tokens: int = 100,
     sleep_time: float = 0.0,
     verbose: bool = False,
@@ -84,6 +85,7 @@ async def generate(
     """
     Generate an output stream based on a prompt, using a LLM (Llama 3.2 1B Instruct).
     """
+    print(safenudge)
     if not safenudge:
         data = generate_output_stream(
             init_prompt=init_prompt,
@@ -100,7 +102,6 @@ async def generate(
         )
         return StreamingResponse(data, media_type="application/json")
     else:
-        print("hello")
         data = WildGuardSafeNudge(
             model=ml_models["model"],
             tokenizer=ml_models["tokenizer"],
@@ -114,7 +115,7 @@ async def generate(
             # clf=SAFENUDGE_CLF,
             clf=ml_models["WILDGUARD"],
             target="",
-            tau=0.5,
+            tau=tau,
             max_tokens=max_new_tokens,
             verbose=verbose
         )
