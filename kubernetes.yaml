@@ -49,11 +49,11 @@ spec:
               containerPort: 8000
           resources:
             requests:
-              cpu: 16
-              memory: 64Gi # Request that this memory be allocated to us
+              cpu: 8
+              memory: 32Gi # Request that this memory be allocated to us
             limits:
-              cpu: 16 # Throttle the container if using more CPU
-              memory: 128Gi # Terminate the container if using more memory
+              cpu: 8 # Throttle the container if using more CPU
+              memory: 32Gi # Terminate the container if using more memory
               nvidia.com/gpu: 1 # Request 1 NVIDIA GPU
 
 ---

@@ -16,7 +16,7 @@ response = requests.post(
         "init_prompt": "Should I wear a seatbelt? Why not?",
         "k": "100",
         "T": "1",
-        "max_new_tokens": "20",
+        "max_new_tokens": "12",
         "random_state": "0",
         "verbose": "false",
     },
@@ -31,18 +31,18 @@ for chunk in response.iter_lines(chunk_size=1):
 print()
 
 # Edit the output
-response = requests.post(
-    URL + "/edit",
-    params={
-        "token_pos": "7",
-        "new_token": "34",
-    },
-    files={"data": json.dumps(out_)},
-)
-out_ = json.loads(response.content)
+# response = requests.post(
+#     URL + "/edit",
+#     params={
+#         "token_pos": "7",
+#         "new_token": "34",
+#     },
+#     files={"data": json.dumps(out_)},
+# )
+# out_ = json.loads(response.content)
 
 response = requests.post(
-    URL + "/generate",
+    URL + "/regenerate",
     params={
         "init_prompt": "Should I wear a seatbelt? Why not?",
         "k": "50",
@@ -50,12 +50,14 @@ response = requests.post(
         "max_new_tokens": "500",
         "random_state": "42",
         "verbose": "false",
+        "token_pos": "5",
+        "new_token": "6",
+        "content": json.dumps(out_),
     },
-    files={"data": out_},
     stream=True,
 )
 
-print("".join([s["selected_text"] for s in eval(out_)]), end="", flush=True)
+print("".join([s["selected_text"] for s in out_[:5]]), end="", flush=True)
 out_ = []
 for chunk in response.iter_lines(chunk_size=1):
     chunk = json.loads(chunk)

@@ -1,4 +1,6 @@
 import json
+import re
+import ast
 from time import sleep
 import pandas as pd
 import numpy as np
@@ -22,10 +24,12 @@ def generate_output_stream(
 
     rng = np.random.default_rng(random_state)
     TERMINATOR = tokenizer.eos_token
+    idx_counter = 0
 
     if data is None:
         data = pd.DataFrame(
             columns=[
+                "idx_counter",
                 "texts",
                 "token_ids",
                 "probs",
@@ -36,6 +40,7 @@ def generate_output_stream(
 
         output = ""
         output_ids = torch.tensor([], dtype=torch.long)
+
     else:
         output = data["selected_text"].str.cat(sep="")
         output_ids = torch.tensor(
@@ -43,6 +48,13 @@ def generate_output_stream(
                 lambda row: row["token_ids"][row["selected_idx"]], axis=1
             ).tolist()
         ).reshape(1, -1)
+
+        previous_content = json.loads(data.to_json(orient="records"))
+        for d in previous_content:
+            if as_json:
+                d = json.dumps(d) + "\n"
+            yield d
+            idx_counter += 1
 
     if verbose:
         print(init_prompt)
@@ -85,12 +97,14 @@ def generate_output_stream(
         next_idx = rng.choice(len(texts_topk), p=probs_topk)
 
         d = {
+            "idx_counter": idx_counter,
             "texts": texts_topk,
             "token_ids": logits_topk_idx.tolist(),
             "probs": probs_topk.tolist(),
             "selected_idx": next_idx,
             "selected_text": texts_topk[next_idx],
         }
+        idx_counter += 1
 
         data.loc[len(data)] = d
 
@@ -152,3 +166,16 @@ def edit_output(data: list, token_pos: int, new_token: int) -> pd.DataFrame:
     # Drop all entries after the modified token
     data.drop(range(token_pos + 1, len(data)), inplace=True)
     return data
+
+
+def parse_connected_json_objects(s):
+    json_objects = re.findall(r"\{.*?\}", s)
+
+    parsed = []
+    for obj in json_objects:
+        try:
+            parsed.append(ast.literal_eval(obj))
+        except Exception as e:
+            print(f"Failed to parse: {obj}. Error: {e}")
+
+    return parsed
