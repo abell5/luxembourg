@@ -1,6 +1,6 @@
 import os
 import json
-import pickle
+# import pickle
 from dotenv import dotenv_values
 import pandas as pd
 import torch
@@ -13,19 +13,21 @@ from . import (
     edit_output,
     parse_connected_json_objects,
 )
-from .safenudge import SafeNudge
+# from .safenudge import SafeNudge
+from .wildguard_safenudge import WildGuard, WildGuardSafeNudge
 
 CUDA = torch.cuda.is_available()
-MODEL_NAME = "meta-llama/Llama-3.1-8B-Instruct"
-SAFENUDGE_CLF = pickle.load(open("api/artifacts/clf_mlp_hidden_states_truncated.pkl", "rb"))
+MODEL_NAME = "meta-llama/Llama-3.2-1B-Instruct"
 
 if "HF_TOKEN" in os.environ:
     TOKEN = os.environ["HF_TOKEN"]
 else:
     TOKEN = dotenv_values()["HF_TOKEN"]
 
+# SAFENUDGE_CLF = pickle.load(open("api/artifacts/clf_mlp_hidden_states_truncated.pkl", "rb"))
+SAFENUDGE_CLF, SAFENUDGE_TOKENIZER = load_model("allenai/wildguard", token=TOKEN, cuda=CUDA)
+WILDGUARD = WildGuard(model=SAFENUDGE_CLF, tokenizer=SAFENUDGE_TOKENIZER)
 model, tokenizer = load_model(MODEL_NAME, token=TOKEN, cuda=CUDA)
-
 app = FastAPI()
 
 app.add_middleware(
@@ -75,7 +77,7 @@ async def generate(
         return StreamingResponse(data, media_type="application/json")
     else:
         print("hello")
-        data = SafeNudge(
+        data = WildGuardSafeNudge(
             model=model,
             tokenizer=tokenizer,
             mode="topk",
@@ -85,7 +87,8 @@ async def generate(
             cuda=CUDA
         ).generate_moderated(
             prompt=init_prompt,
-            clf=SAFENUDGE_CLF,
+            # clf=SAFENUDGE_CLF,
+            clf=WILDGUARD,
             target="",
             tau=0.9,
             max_tokens=max_new_tokens,
