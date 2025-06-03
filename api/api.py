@@ -4,6 +4,7 @@ import json
 from dotenv import dotenv_values
 import pandas as pd
 import torch
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,10 +26,33 @@ else:
     TOKEN = dotenv_values()["HF_TOKEN"]
 
 # SAFENUDGE_CLF = pickle.load(open("api/artifacts/clf_mlp_hidden_states_truncated.pkl", "rb"))
-SAFENUDGE_CLF, SAFENUDGE_TOKENIZER = load_model("allenai/wildguard", token=TOKEN, cuda=CUDA)
-WILDGUARD = WildGuard(model=SAFENUDGE_CLF, tokenizer=SAFENUDGE_TOKENIZER)
-model, tokenizer = load_model(MODEL_NAME, token=TOKEN, cuda=CUDA)
-app = FastAPI()
+# if "SAFENUDGE_CLF" not in globals():
+#     print("Loading SafeNudge model...")
+# SAFENUDGE_CLF, SAFENUDGE_TOKENIZER = load_model("allenai/wildguard", token=TOKEN, cuda=CUDA, use_safetensors=True)
+# WILDGUARD = WildGuard(model=SAFENUDGE_CLF, tokenizer=SAFENUDGE_TOKENIZER)
+# model, tokenizer = load_model(MODEL_NAME, token=TOKEN, cuda=CUDA)
+
+ml_models = {}
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Load the ML model
+    ml_models["SAFENUDGE_CLF"], ml_models["SAFENUDGE_TOKENIZER"] = load_model(
+        "allenai/wildguard", token=TOKEN, cuda=CUDA, use_safetensors=True
+    )
+    ml_models["WILDGUARD"] = WildGuard(
+        model=ml_models["SAFENUDGE_CLF"], tokenizer=ml_models["SAFENUDGE_TOKENIZER"]
+    )
+    ml_models["model"], ml_models["tokenizer"] = load_model(
+        MODEL_NAME, token=TOKEN, cuda=CUDA
+    )
+    yield
+    # Clean up the ML models and release the resources
+    ml_models.clear()
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -63,8 +87,8 @@ async def generate(
     if not safenudge:
         data = generate_output_stream(
             init_prompt=init_prompt,
-            model=model,
-            tokenizer=tokenizer,
+            model=ml_models["model"],
+            tokenizer=ml_models["tokenizer"],
             k=k,
             T=T,
             max_new_tokens=max_new_tokens,
@@ -78,8 +102,8 @@ async def generate(
     else:
         print("hello")
         data = WildGuardSafeNudge(
-            model=model,
-            tokenizer=tokenizer,
+            model=ml_models["model"],
+            tokenizer=ml_models["tokenizer"],
             mode="topk",
             k=k,
             temperature=T,
@@ -88,9 +112,9 @@ async def generate(
         ).generate_moderated(
             prompt=init_prompt,
             # clf=SAFENUDGE_CLF,
-            clf=WILDGUARD,
+            clf=ml_models["WILDGUARD"],
             target="",
-            tau=0.9,
+            tau=0.5,
             max_tokens=max_new_tokens,
             verbose=verbose
         )
@@ -135,8 +159,8 @@ async def regenerate(
 
     result = generate_output_stream(
         init_prompt=init_prompt,
-        model=model,
-        tokenizer=tokenizer,
+        model=ml_models["model"],
+        tokenizer=ml_models["tokenizer"],
         k=k,
         T=T,
         max_new_tokens=max_new_tokens,
