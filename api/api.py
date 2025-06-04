@@ -38,8 +38,8 @@ async def lifespan(app: FastAPI):
     ml_models["SAFENUDGE_CLF"] = AutoModelForCausalLM.from_pretrained(
         "allenai/wildguard", token=TOKEN
     )
-    ml_models["SAFENUDGE_TOKENIZER"].to("cuda")
-    ml_models["SAFENUDGE_CLF"].to("cuda")
+    if CUDA:
+        ml_models["SAFENUDGE_CLF"].to("cuda")
 
     ml_models["WILDGUARD"] = WildGuard(
         model=ml_models["SAFENUDGE_CLF"], tokenizer=ml_models["SAFENUDGE_TOKENIZER"]
