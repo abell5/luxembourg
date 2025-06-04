@@ -15,6 +15,7 @@ from . import (
     parse_connected_json_objects,
 )
 # from .safenudge import SafeNudge
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from .wildguard_safenudge import WildGuard, WildGuardSafeNudge
 
 CUDA = torch.cuda.is_available()
@@ -25,25 +26,23 @@ if "HF_TOKEN" in os.environ:
 else:
     TOKEN = dotenv_values()["HF_TOKEN"]
 
-# SAFENUDGE_CLF = pickle.load(open("api/artifacts/clf_mlp_hidden_states_truncated.pkl", "rb"))
-# if "SAFENUDGE_CLF" not in globals():
-#     print("Loading SafeNudge model...")
-# SAFENUDGE_CLF, SAFENUDGE_TOKENIZER = load_model("allenai/wildguard", token=TOKEN, cuda=CUDA, use_safetensors=True)
-# WILDGUARD = WildGuard(model=SAFENUDGE_CLF, tokenizer=SAFENUDGE_TOKENIZER)
-# model, tokenizer = load_model(MODEL_NAME, token=TOKEN, cuda=CUDA)
-
 ml_models = {}
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Load the ML model
-    ml_models["SAFENUDGE_CLF"], ml_models["SAFENUDGE_TOKENIZER"] = load_model(
-        "allenai/wildguard", token=TOKEN, cuda=CUDA, use_safetensors=True
+async def lifespan(app: FastAPI): 
+    # Wildguard
+    ml_models["SAFENUDGE_TOKENIZER"] = AutoTokenizer.from_pretrained(
+        "allenai/wildguard", token=TOKEN
+    )
+    ml_models["SAFENUDGE_CLF"] = AutoModelForCausalLM.from_pretrained(
+        "allenai/wildguard", token=TOKEN
     )
     ml_models["WILDGUARD"] = WildGuard(
         model=ml_models["SAFENUDGE_CLF"], tokenizer=ml_models["SAFENUDGE_TOKENIZER"]
     )
+
+    # LLM
     ml_models["model"], ml_models["tokenizer"] = load_model(
         MODEL_NAME, token=TOKEN, cuda=CUDA
     )
