@@ -196,24 +196,28 @@ class SafeNudge(ModelWrapper):
                 if verbose:
                     print("|||", end="")
                 nudged = True
-                yield json.dumps({
-                    "idx_counter": -1,
-                    "texts": [],
-                    "token_ids": [],
-                    "probs": [],
-                    "selected_idx": -1,
-                    "selected_text": "[NUDGE]",
-                }) + "\n"
+                yield json.dumps(
+                    {
+                        "idx_counter": -1,
+                        "texts": [],
+                        "token_ids": [],
+                        "probs": [],
+                        "selected_idx": -1,
+                        "selected_text": "[NUDGE]",
+                    }
+                ) + "\n"
             else:
                 sentence += next_token_str
                 input_ids = torch.cat((input_ids, next_token.reshape(1, 1)), dim=1)
                 if verbose:
                     print(next_token_str, end="")
-                yield json.dumps({
-                    "idx_counter": -1,
-                    "texts": [],
-                    "token_ids": [],
-                    "probs": [],
-                    "selected_idx": -1,
-                    "selected_text": next_token_str,
-                }) + "\n"
+                yield json.dumps(
+                    {
+                        "idx_counter": -1,
+                        "texts": [],
+                        "token_ids": [],
+                        "probs": [],
+                        "selected_idx": -1,
+                        "selected_text": next_token_str,
+                    }
+                ) + "\n"

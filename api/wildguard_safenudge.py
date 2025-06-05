@@ -27,7 +27,7 @@ class WildGuard:
         model=None,
         tokenizer=None,
         device="auto",
-        use_safetensors=True
+        use_safetensors=True,
     ):
         self.model_path = model_path
         self.device = device
@@ -62,19 +62,15 @@ class WildGuard:
         """
 
         with torch.no_grad():
-            model_input = self.INSTRUCTION.format(
-                prompt=prompt, response=response
-            )
+            model_input = self.INSTRUCTION.format(prompt=prompt, response=response)
             input_ids = self._tokenizer(
-                [model_input],
-                return_tensors='pt',
-                add_special_tokens=False
+                [model_input], return_tensors="pt", add_special_tokens=False
             )
 
             if self._model.device.type != "cpu":
-                #input_ids = input_ids["input_ids"].cuda()
-                input_ids = {k:v.cuda() for k, v in input_ids.items()}
-            
+                # input_ids = input_ids["input_ids"].cuda()
+                input_ids = {k: v.cuda() for k, v in input_ids.items()}
+
             output = self._model.generate(
                 **input_ids,
                 max_new_tokens=32,
@@ -92,8 +88,7 @@ class WildGuard:
                 return scores
 
             res = self._tokenizer.decode(
-                output[0][len(input_ids['input_ids'][0]):],
-                skip_special_tokens=True
+                output[0][len(input_ids["input_ids"][0]) :], skip_special_tokens=True
             )
 
             del input_ids, output
@@ -113,14 +108,10 @@ class WildGuard:
         return res
 
     def _individual_proba(self, prompt, response):
-        logits = self._individual(
-            prompt=prompt, response=response, output_scores=True
-        )
+        logits = self._individual(prompt=prompt, response=response, output_scores=True)
         yes_idx = self._tokenizer.encode("yes")[-1]
         no_idx = self._tokenizer.encode("no")[-1]
-        proba = torch.nn.functional.softmax(
-            logits[0, (yes_idx, no_idx)]
-        )[0].item()
+        proba = torch.nn.functional.softmax(logits[0, (yes_idx, no_idx)])[0].item()
         return proba
 
 
@@ -176,10 +167,7 @@ class WildGuardSafeNudge(ModelWrapper):
             if (
                 (j >= 5)
                 and (not nudged)
-                and (
-                    clf._individual_proba(prompt, sentence + next_token_str)
-                    >= tau
-                )
+                and (clf._individual_proba(prompt, sentence + next_token_str) >= tau)
             ):
                 nudge_ids = self.tokenizer(self.NUDGE + sentence)["input_ids"][1:]
                 # sentence is not modified
@@ -189,25 +177,29 @@ class WildGuardSafeNudge(ModelWrapper):
                 if verbose:
                     print("|||", end="")
                 nudged = True
-                yield json.dumps({
-                    "idx_counter": -1,
-                    "texts": [],
-                    "token_ids": [],
-                    "probs": [],
-                    "selected_idx": -1,
-                    "selected_text": "[NUDGE]",
-                }) + "\n"
+                yield json.dumps(
+                    {
+                        "idx_counter": -1,
+                        "texts": [],
+                        "token_ids": [],
+                        "probs": [],
+                        "selected_idx": -1,
+                        "selected_text": "[NUDGE]",
+                    }
+                ) + "\n"
 
             else:
                 sentence += next_token_str
                 input_ids = torch.cat((input_ids, next_token.reshape(1, 1)), dim=1)
                 if verbose:
                     print(next_token_str, end="")
-                yield json.dumps({
-                    "idx_counter": -1,
-                    "texts": [],
-                    "token_ids": [],
-                    "probs": [],
-                    "selected_idx": -1,
-                    "selected_text": next_token_str,
-                }) + "\n"
+                yield json.dumps(
+                    {
+                        "idx_counter": -1,
+                        "texts": [],
+                        "token_ids": [],
+                        "probs": [],
+                        "selected_idx": -1,
+                        "selected_text": next_token_str,
+                    }
+                ) + "\n"

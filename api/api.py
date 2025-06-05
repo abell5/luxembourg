@@ -1,5 +1,6 @@
 import os
 import json
+
 # import pickle
 from dotenv import dotenv_values
 import pandas as pd
@@ -14,6 +15,7 @@ from . import (
     edit_output,
     parse_connected_json_objects,
 )
+
 # from .safenudge import SafeNudge
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from .wildguard_safenudge import WildGuard, WildGuardSafeNudge
@@ -30,7 +32,7 @@ ml_models = {}
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI): 
+async def lifespan(app: FastAPI):
     # Wildguard
     ml_models["SAFENUDGE_TOKENIZER"] = AutoTokenizer.from_pretrained(
         "allenai/wildguard", token=TOKEN
@@ -111,7 +113,7 @@ async def generate(
             k=k,
             temperature=T,
             random_state=random_state,
-            cuda=CUDA
+            cuda=CUDA,
         ).generate_moderated(
             prompt=init_prompt,
             # clf=SAFENUDGE_CLF,
@@ -119,7 +121,7 @@ async def generate(
             target="",
             tau=tau,
             max_tokens=max_new_tokens,
-            verbose=verbose
+            verbose=verbose,
         )
         return StreamingResponse(data, media_type="application/json")
 
