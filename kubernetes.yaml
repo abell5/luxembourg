@@ -32,7 +32,7 @@ spec:
         app: llm-viz
     spec:
       containers:
-        # Here's our container
+        # Backend container
         - name: llm-viz
           # Put your own image here
           image: ghcr.io/abell5/llm-viz:latest
@@ -44,8 +44,8 @@ spec:
                   name: hf-token
                   key: token
           ports:
-            # This is the port we'll expose to the internet eventually
-            - name: web
+            # This is the port for the backend API
+            - name: api
               containerPort: 8000
           resources:
             requests:
@@ -55,6 +55,21 @@ spec:
               cpu: 32 # Throttle the container if using more CPU
               memory: 128Gi # Terminate the container if using more memory
               nvidia.com/gpu: 1 # Request 1 NVIDIA GPU
+        # Frontend container
+        - name: cognitive-guardrails
+          image: ghcr.io/abell5/cognitive-guardrails:latest
+          imagePullPolicy: Always
+          ports:
+            # This is the port for the frontend
+            - name: web
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
 
 ---
 
@@ -74,7 +89,7 @@ spec:
     - name: web
       protocol: TCP
       port: 80 # The port exposed by the service
-      targetPort: 8000 # The port or port name of the Pod
+      targetPort: 80 # The port of the frontend container
 
 ---
 
