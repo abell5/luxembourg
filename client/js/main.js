@@ -40,6 +40,11 @@ function getStream() {
                     //console.log("--START--")
                     
                     let current_chunk = chunks[i];
+                    
+                    // Skip empty chunks
+                    if (!current_chunk.trim()) {
+                        continue;
+                    }
 
                     if (current_chunk.slice(0,1) != "{") {
                         current_chunk = "{" + current_chunk;
@@ -48,9 +53,15 @@ function getStream() {
                         current_chunk = current_chunk + "}";
                     }
 
-                    var obj = JSON.parse(current_chunk);
-                    console.log(obj)
-                    build(obj)
+                    try {
+                        var obj = JSON.parse(current_chunk);
+                        console.log(obj)
+                        build(obj)
+                    } catch (e) {
+                        console.error("JSON parse error:", e);
+                        console.error("Problematic chunk:", current_chunk);
+                        console.error("Raw chunk:", chunks[i]);
+                    }
                     
                     //console.log("--END--")
                 }
@@ -235,6 +246,11 @@ function barplot_new(data) {
                             //console.log("--START--")
                             
                             let current_chunk = chunks[i];
+                            
+                            // Skip empty chunks
+                            if (!current_chunk.trim()) {
+                                continue;
+                            }
         
                             if (current_chunk.slice(0,1) != "{") {
                                 current_chunk = "{" + current_chunk;
@@ -242,12 +258,18 @@ function barplot_new(data) {
                             if (current_chunk.slice(-1) != "}") {
                                 current_chunk = current_chunk + "}";
                             }
-        
-                            var obj = JSON.parse(current_chunk);
-                            console.log(obj)
-                            build(obj)
                             
-                            //console.log("--END--")
+                            try {
+                                var obj = JSON.parse(current_chunk);
+                                console.log(obj)
+                                build(obj)
+                            } catch (e) {
+                                console.error("JSON parse error:", e);
+                                console.error("Problematic chunk:", current_chunk);
+                                console.error("Raw chunk:", chunks[i]);
+                            }
+                            
+                            //console.log("--END--"))
                         }
                         current_chunk_idx = chunks.length-1;
                         //console.log(myArray)
