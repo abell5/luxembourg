@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="js/main.js" type="text/javascript"></script>
+    
+
+    <link rel="stylesheet" href="css/main.css"/>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+
+<div id="container">
+
+    <div id="left-panel">
+        
+        
+        <div id="output">
+            <div class="start-char">></div>
+
+        </div>
+        <div id="chat-input">
+            <textarea placeholder="What can I help you with?"></textarea>
+            <button id="get-stream">&#10095;</button>
+        </div>
+
+        
+
+    </div>
+
+    <div id="right-panel">
+        <div id="right-panel-top">
+            <svg id="barplot"></svg>
+        </div>
+        <div id="right-panel-bottom">
+
+            <div class="uncertainty-controls">
+                <input class="toggle uncertainty-toggle" type="checkbox"> <div class="uncertainty-controls-text">Display uncertainty</div>
+            </div>
+            <div class="safenudge-controls">
+                <input class="toggle safenudge-toggle" type="checkbox"> <div class="safenudge-controls-text">SafeNudge&#x2122</div>
+            </div>
+            <div class="random-seed-controls">
+                <input id="random-seed" type="number" min="0" step="1" placeholder="0"></input> <div class="uncertainty-controls-text">Random state</div>
+            </div>
+            <div class="sleep-time-controls">
+                Delay:
+                <div class="slider-container">
+                    <div class="slider-0s">0s</div><div class="slider-max">2s</div>
+                    <input type="range" min="0" max="2" value="0" step="0.1" class="slider" id="sleep-time">
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    
+    <div id="data-store" data-current-output=""></div>
+    
+
+</div>
+
+
+
+</body>
+</html>

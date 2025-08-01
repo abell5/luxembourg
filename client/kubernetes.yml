@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cognitive-guardrails
+  labels:
+    app: cognitive-guardrails
+    source: hsrn-tutorial
+spec:
+  # Run two copies of the Pod
+  # replicas: 1
+  # Perform rolling updates, starting containers before stopping the old ones
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      # This is how the Deployment recognizes its Pods, has to match the labels
+      # of the Pod template
+      app: cognitive-guardrails
+  template:
+    metadata:
+      labels:
+        app: cognitive-guardrails
+    spec:
+      containers:
+        # Here's our Flask container
+        - name: cognitive-guardrails-container
+          # Put your own image here
+          image: ghcr.io/abell5/cognitive-guardrails
+          ports:
+            # This is the port we'll expose to the internet eventually
+            - name: web
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m # Request very little CPU
+              memory: 100Mi # Request that this memory be allocated to us
+            limits:
+              cpu: 100m # Throttle the container if using more CPU
+              memory: 100Mi # Terminate the container if using more memory

@@ -1,0 +1,358 @@
+body {
+  background-color: #212121;
+
+  font-family: Andale Mono, AndaleMono, monospace;
+  letter-spacing: 0px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #f5f6fa;
+}
+
+#container {
+  width: 1020px;
+  height: 600px;
+  /*border: 1px solid black;*/
+  margin: auto;
+}
+
+#left-panel {
+  width: 680px;
+  height: 580px;
+  float: left;
+  border: 1px solid rgb(127, 140, 141);
+  margin-right: 10px;
+}
+
+#right-panel {
+  width: 320px;
+  height: 580px;
+  float: left;
+  overflow: visible;
+  border: 1px solid rgb(127, 140, 141);
+  /*box-shadow: 1px 2px 2px black;*/
+}
+#right-panel-top {
+  height: 415px;
+  width: 290px;
+  padding-left: 30px;
+  float: bottom;
+  border-bottom: 1px solid rgb(127, 140, 141);
+  overflow: hidden;
+}
+
+#right-panel-bottom {
+  height: 165px;
+  width: 320px;
+}
+
+#output {
+  width: 620px;
+  height: 449px;
+  padding: 30px;
+  overflow: hidden;
+}
+.start-char {
+  /* positioning */
+  position: relative;
+  top: 18px;
+  left: -12px;
+  font-size: 18px;
+  z-index: -1;
+}
+
+#chat-input {
+  width: 660px;
+  height: 50px;
+  padding: 10px;
+  background-color: #202c33;
+  margin: auto;
+  border-top: 1px solid rgb(127, 140, 141);
+  /*box-shadow: inset 0px 0px 5px#000;*/
+  /*padding-bottom: 10px;*/
+}
+#chat-input textarea {
+  /* size */
+  width: 610px;
+  height: 50px;
+  padding: 5px;
+  padding-right: 35px;
+
+  /* font styling*/
+  font-family: Andale Mono, AndaleMono, monospace;
+  letter-spacing: 0px;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #f5f6fa;
+
+  /* border styling */
+  border-radius: 0px;
+  border: 1px solid rgb(127, 140, 141);
+
+  /* styling */
+  resize: none;
+  box-sizing: border-box;
+  background-color: #2a3942;
+}
+#chat-input textarea:focus {
+  outline-color: transparent;
+  outline-style: none;
+}
+/*
+        #query-form textarea::placeholder {
+            font-family: Andale Mono,AndaleMono,monospace; 
+            letter-spacing: 0px;
+        }
+        */
+
+#chat-input button {
+  /* size and shape */
+  height: 51px;
+  width: 40px;
+  border-radius: 0px;
+  padding-bottom: 10px;
+
+  /* positioning */
+  position: relative;
+  top: -17px;
+  left: 0px;
+
+  /* font styling */
+  font-family: Andale Mono, AndaleMono, monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 24px;
+  color: #f5f6fa;
+  padding-right: 2px;
+  padding-top: 8px;
+
+  /* styling */
+  cursor: pointer;
+  border: 1px solid rgb(127, 140, 141);
+  background-color: #2a3942;
+}
+#query-form button:hover {
+  background-color: #636e72;
+}
+
+.text {
+  margin: 0;
+  padding: 0;
+  float: left;
+  white-space: pre;
+  height: 15.5px !important;
+}
+.text:hover {
+  cursor: pointer;
+}
+.selected {
+  text-decoration: underline;
+  text-decoration-color: rgb(39, 174, 96);
+  text-decoration-thickness: 3px;
+}
+.uncertainty {
+  background-color: #c0392b;
+}
+
+g {
+  overflow: visible;
+}
+
+svg {
+  overflow: visible;
+}
+
+.domain {
+  visibility: hidden;
+}
+
+.tick line {
+  visibility: hidden;
+}
+
+.tick text {
+  /* font styling */
+  font-family: Andale Mono, AndaleMono, monospace;
+  letter-spacing: 1px;
+  font-size: 12px;
+  color: #f5f6fa !important;
+  cursor: pointer;
+}
+
+.bar {
+  fill: rgb(39, 174, 96);
+}
+.axis text {
+  font-size: 12px;
+}
+.axis path,
+.axis line {
+  stroke: #000;
+}
+
+.uncertainty-controls {
+  height: 26px;
+  padding: 5px;
+}
+.uncertainty-controls-text {
+  float: left;
+  height: 16px;
+  padding: 6px;
+}
+
+.safenudge-controls {
+  height: 26px;
+  padding: 5px;
+}
+.safenudge-controls-text {
+  float: left;
+  height: 16px;
+  padding: 6px;
+}
+
+.toggle {
+  appearance: none;
+  margin: 0px;
+
+  position: relative;
+  float: left;
+  box-sizing: content-box;
+
+  width: 50px;
+  height: 20px;
+  padding: 3px;
+
+  cursor: pointer;
+  overflow: hidden;
+
+  background-color: transparent;
+  transition: background ease 0.3s;
+  border: 1px solid rgb(127, 140, 141);
+}
+.toggle:before {
+  /* font */
+  font-family: Andale Mono, AndaleMono, monospace;
+  letter-spacing: 0px;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.4;
+  text-transform: uppercase;
+
+  /* styling */
+  content: "on   off";
+  display: block;
+  position: absolute;
+  z-index: 2;
+  width: 20px;
+  height: 20px;
+
+  text-indent: -20px;
+  word-spacing: 20px;
+
+  white-space: nowrap;
+  background: #f5f6fa;
+  color: #f5f6fa;
+  transition: transform cubic-bezier(0.3, 1.5, 0.7, 1) 0s;
+}
+.toggle:checked {
+  background-color: rgb(39, 174, 96);
+}
+.toggle:checked:before {
+  transform: translateX(30px);
+}
+
+.random-seed-controls {
+  height: 26px;
+  padding: 5px;
+}
+
+.random-seed-controls input {
+  float: left;
+  height: 26px;
+  width: 52px;
+  appearance: none;
+  background: transparent;
+  border: 1px solid rgb(127, 140, 141);
+
+  /* font styling */
+  font-family: Andale Mono, AndaleMono, monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 14px;
+  color: #f5f6fa;
+}
+.random-seed-controls input:focus {
+  outline-color: transparent;
+  outline-style: none;
+}
+
+.random-seed-controls-text {
+  float: left;
+  height: 16px;
+  padding: 6px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.sleep-time-controls {
+  padding: 5px;
+}
+.slider-container {
+  width: 305px;
+  height: 26px;
+  position: relative;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: inherit;
+  height: 26px;
+  background: transparent;
+  outline: none;
+  opacity: 1;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
+  border: 1px solid rgb(127, 140, 141);
+}
+
+.slider-0s {
+  position: absolute;
+  top: 8px;
+  left: 7px;
+  z-index: -1;
+}
+.slider-max {
+  position: absolute;
+  top: 8px;
+  right: 2px;
+  z-index: -1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #f5f6fa;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #f5f6fa;
+  cursor: pointer;
+}
+
+.data-store {
+  display: none;
+}
