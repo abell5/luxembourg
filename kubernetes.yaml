@@ -32,8 +32,8 @@ spec:
         app: llm-viz
     spec:
       containers:
-        # Backend container
-        - name: llm-viz
+        # Combined backend and frontend container
+        - name: llm-viz-combined
           # Put your own image here
           image: ghcr.io/abell5/llm-viz:latest
           imagePullPolicy: Always
@@ -44,9 +44,9 @@ spec:
                   name: hf-token
                   key: token
           ports:
-            # This is the port for the backend API
-            - name: api
-              containerPort: 8000
+            # This is the port for the combined web interface and API
+            - name: web
+              containerPort: 80
           resources:
             requests:
               cpu: 32 
@@ -55,21 +55,6 @@ spec:
               cpu: 32 # Throttle the container if using more CPU
               memory: 128Gi # Terminate the container if using more memory
               nvidia.com/gpu: 1 # Request 1 NVIDIA GPU
-        # Frontend container
-        - name: cognitive-guardrails
-          image: ghcr.io/abell5/cognitive-guardrails:latest
-          imagePullPolicy: Always
-          ports:
-            # This is the port for the frontend
-            - name: web
-              containerPort: 80
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
 
 ---
 

@@ -4,9 +4,9 @@ FROM nvidia/cuda:12.1.1-runtime-ubuntu20.04
 ENV PATH="/root/miniconda3/bin:${PATH}"
 ARG PATH="/root/miniconda3/bin:${PATH}"
 
-# Install wget to fetch Miniconda
+# Install wget and nginx to fetch Miniconda and serve frontend
 RUN apt-get update && \
-    apt-get install -y wget && \
+    apt-get install -y wget nginx && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -31,5 +31,18 @@ COPY ./requirements.txt /src/requirements.txt
 COPY ./api /src/api
 RUN pip install --no-cache-dir --upgrade -r /src/requirements.txt
 RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-# COPY ./.env /src/.env
-CMD ["fastapi", "run", "api/api.py", "--port", "8000", "--workers", "-1"]
+
+# Setup frontend
+COPY client/ /usr/share/nginx/html/
+RUN rm /usr/share/nginx/html/index.html || true
+RUN mv /usr/share/nginx/html/main.html /usr/share/nginx/html/index.html
+
+# Configure Nginx to proxy API calls
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Create startup script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+EXPOSE 80
+CMD ["/start.sh"]

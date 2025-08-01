@@ -28,7 +28,7 @@ function getStream() {
     $.ajax({
         method: "POST",
         dataType: 'text',
-        url: "http://llm-viz:8000/generate?init_prompt="+query+"&safenudge="+safenudge+"&k=20&T=1.3&max_new_tokens=300&verbose=false&random_state="+random_state+"&sleep_time="+sleep_time,
+        url: "/generate?init_prompt="+query+"&safenudge="+safenudge+"&k=20&T=1.3&max_new_tokens=300&verbose=false&random_state="+random_state+"&sleep_time="+sleep_time,
         crossDomain: true,
         xhrFields: {
             onprogress: function (event) {
@@ -217,7 +217,7 @@ function barplot_new(data) {
             $.ajax({
                 method: "POST",
                 dataType: 'text',
-                url: "http://llm-viz:8000/regenerate?init_prompt="+query+"&content="+current_output+"&token_pos="+idx_counter+"&new_token="+text+"&k=20&T=1.3&max_new_tokens=300&sleep_time="+sleep_time+"&verbose=true&random_state="+random_state,
+                url: "/regenerate?init_prompt="+query+"&content="+current_output+"&token_pos="+idx_counter+"&new_token="+text+"&k=20&T=1.3&max_new_tokens=300&sleep_time="+sleep_time+"&verbose=true&random_state="+random_state,
                 crossDomain: true,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
