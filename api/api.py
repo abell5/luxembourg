@@ -6,9 +6,10 @@ from dotenv import dotenv_values
 import pandas as pd
 import torch
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Form
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
 from . import (
     load_model,
     generate_output_stream,
@@ -75,16 +76,16 @@ async def root():
 
 @app.post("/generate", summary="Generate an output")
 async def generate(
-    init_prompt: str,
-    k: int = 30,
-    T: float = 1,
-    tau: float = 0.5,
-    max_new_tokens: int = 100,
-    sleep_time: float = 0.0,
-    verbose: bool = False,
-    random_state: int = None,
-    data: list = None,
-    safenudge: bool = False,
+    init_prompt: str = Form(...),
+    k: int = Form(30),
+    T: float = Form(1),
+    tau: float = Form(0.5),
+    max_new_tokens: int = Form(100),
+    sleep_time: float = Form(0.0),
+    verbose: bool = Form(False),
+    random_state: Optional[int] = Form(None),
+    data: Optional[list] = Form(None),
+    safenudge: bool = Form(False),
 ):
     """
     Generate an output stream based on a prompt, using a LLM (Llama 3.2 1B Instruct).
@@ -142,16 +143,16 @@ def edit(
 
 @app.post("/regenerate", summary="Generate an output")
 async def regenerate(
-    init_prompt: str,
-    k: int = 30,
-    T: float = 1,
-    max_new_tokens: int = 100,
-    sleep_time: float = 0.0,
-    verbose: bool = False,
-    random_state: int = None,
-    content: str = None,
-    token_pos: int = None,
-    new_token: str = None,
+    init_prompt: str = Form(...),
+    k: int = Form(30),
+    T: float = Form(1),
+    max_new_tokens: int = Form(100),
+    sleep_time: float = Form(0.0),
+    verbose: bool = Form(False),
+    random_state: Optional[int] = Form(None),
+    content: Optional[str] = Form(None),
+    token_pos: Optional[int] = Form(None),
+    new_token: Optional[str] = Form(None),
 ):
     """
     Generate an output stream based on a prompt, using a LLM (Llama 3.2 1B Instruct).
